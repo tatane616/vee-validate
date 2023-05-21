@@ -1,5 +1,5 @@
-import { ComputedRef, Ref } from 'vue';
-import { MapValuesPathsToRefs, MaybeRef, GenericObject, MaybeRefOrLazy } from './common';
+import { ComputedRef, Ref, MaybeRef, MaybeRefOrGetter } from 'vue';
+import { MapValuesPathsToRefs, GenericObject } from './common';
 import { FieldValidationMetaInfo } from '../../../shared';
 import { Path, PathValue } from './paths';
 import { PartialDeep } from 'type-fest';
@@ -328,7 +328,7 @@ export interface FormContext<TValues extends GenericObject = GenericObject, TOut
     TValue = PathValue<TValues, TPath>,
     TExtras extends GenericObject = GenericObject
   >(
-    path: MaybeRefOrLazy<TPath>,
+    path: MaybeRefOrGetter<TPath>,
     config?: Partial<ComponentBindsConfig<TValue, TExtras>> | LazyComponentBindsConfig<TValue, TExtras>
   ): Ref<BaseComponentBinds<TValue> & TExtras>;
   defineInputBinds<
@@ -336,7 +336,7 @@ export interface FormContext<TValues extends GenericObject = GenericObject, TOut
     TValue = PathValue<TValues, TPath>,
     TExtras extends GenericObject = GenericObject
   >(
-    path: MaybeRefOrLazy<TPath>,
+    path: MaybeRefOrGetter<TPath>,
     config?: Partial<InputBindsConfig<TValue, TExtras>> | LazyInputBindsConfig<TValue, TExtras>
   ): Ref<BaseInputBinds<TValue> & TExtras>;
 }

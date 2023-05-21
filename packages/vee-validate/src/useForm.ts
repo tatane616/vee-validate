@@ -12,6 +12,9 @@ import {
   warn,
   watchEffect,
   shallowRef,
+  toValue,
+  MaybeRef,
+  MaybeRefOrGetter,
 } from 'vue';
 import { klona as deepCopy } from 'klona/full';
 import {
@@ -19,7 +22,6 @@ import {
   SubmissionHandler,
   GenericValidateFunction,
   ValidationResult,
-  MaybeRef,
   FormState,
   FormValidationResult,
   PrivateFormContext,
@@ -40,7 +42,6 @@ import {
   PathValue,
   PathState,
   PathStateConfig,
-  MaybeRefOrLazy,
   BaseComponentBinds,
   BaseInputBinds,
   InputBindsConfig,
@@ -60,7 +61,6 @@ import {
   isEqual,
   isTypedSchema,
   normalizeErrorItem,
-  unravel,
   normalizeEventValue,
   omit,
 } from './utils';
@@ -237,10 +237,10 @@ export function useForm<
   const schema = opts?.validationSchema;
 
   function createPathState<TValue>(
-    path: MaybeRefOrLazy<Path<TValues>>,
+    path: MaybeRefOrGetter<Path<TValues>>,
     config?: Partial<PathStateConfig>
   ): PathState<TValue> {
-    const initialValue = computed(() => getFromPath(initialValues.value, unravel(path)));
+    const initialValue = computed(() => getFromPath(initialValues.value, toValue(path)));
     const pathStateExists = pathStates.value.find(state => state.path === unref(path));
     if (pathStateExists) {
       if (config?.type === 'checkbox' || config?.type === 'radio') {
@@ -260,8 +260,8 @@ export function useForm<
       return pathStateExists as PathState<TValue>;
     }
 
-    const currentValue = computed(() => getFromPath(formValues, unravel(path)));
-    const pathValue = unravel(path);
+    const currentValue = computed(() => getFromPath(formValues, toValue(path)));
+    const pathValue = toValue(path);
     const id = FIELD_ID_COUNTER++;
     const state = reactive({
       id,
@@ -849,10 +849,10 @@ export function useForm<
     TValue = PathValue<TValues, TPath>,
     TExtras extends GenericObject = GenericObject
   >(
-    path: MaybeRefOrLazy<TPath>,
+    path: MaybeRefOrGetter<TPath>,
     config?: Partial<ComponentBindsConfig<TValue, TExtras>> | LazyComponentBindsConfig<TValue, TExtras>
   ) {
-    const pathState = findPathState(unravel(path)) || createPathState(path);
+    const pathState = findPathState(toValue(path)) || createPathState(path);
     const evalConfig = () => (isCallable(config) ? config(omit(pathState, PRIVATE_PATH_STATE_KEYS)) : config || {});
 
     function onBlur() {
@@ -903,10 +903,10 @@ export function useForm<
     TValue = PathValue<TValues, TPath>,
     TExtras extends GenericObject = GenericObject
   >(
-    path: MaybeRefOrLazy<TPath>,
+    path: MaybeRefOrGetter<TPath>,
     config?: Partial<InputBindsConfig<TValue, TExtras>> | LazyInputBindsConfig<TValue, TExtras>
   ) {
-    const pathState = (findPathState(unravel(path)) || createPathState(path)) as PathState<TValue>;
+    const pathState = (findPathState(toValue(path)) || createPathState(path)) as PathState<TValue>;
     const evalConfig = () => (isCallable(config) ? config(omit(pathState, PRIVATE_PATH_STATE_KEYS)) : config || {});
 
     function onBlur() {
